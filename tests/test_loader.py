@@ -2,6 +2,7 @@ from pathlib import Path
 
 from magnetic_anomaly_hunter.loader import (
     list_measurement_archives,
+    parse_raw_csv,
     read_raw_csv,
 )
 
@@ -13,6 +14,14 @@ EXPECTED_HEADER = (
     '"Magnetic Field y (µT)","Magnetic Field z (µT)",'
     '"Absolute field (µT)"'
 )
+
+EXPECTED_COLUMNS = [
+    "Time (s)",
+    "Magnetic Field x (µT)",
+    "Magnetic Field y (µT)",
+    "Magnetic Field z (µT)",
+    "Absolute field (µT)",
+]
 
 
 def test_list_measurement_archives_finds_all_exports():
@@ -32,3 +41,14 @@ def test_read_raw_csv_returns_expected_data():
     assert isinstance(csv_text, str)
     assert lines[0] == EXPECTED_HEADER
     assert len(lines) > 1
+
+
+def test_parse_raw_csv_returns_numeric_table():
+    archives = list_measurement_archives(ARCHIVE_PATH)
+    csv_text = read_raw_csv(ARCHIVE_PATH, archives[0])
+
+    measurement_table = parse_raw_csv(csv_text)
+
+    assert list(measurement_table.columns) == EXPECTED_COLUMNS
+    assert not measurement_table.empty
+    assert all(dtype.kind in "fi" for dtype in measurement_table.dtypes)

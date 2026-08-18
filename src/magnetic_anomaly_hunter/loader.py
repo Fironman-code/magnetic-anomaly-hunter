@@ -1,5 +1,7 @@
-from io import BytesIO
+from io import BytesIO, StringIO
 from zipfile import ZipFile
+
+import pandas as pd
 
 
 def list_measurement_archives(zip_path):
@@ -27,6 +29,14 @@ def read_raw_csv(zip_path, archive_name):
     return csv_data.decode("utf-8-sig")
 
 
+def parse_raw_csv(csv_text):
+    """Premení CSV text na dátovú tabuľku."""
+    csv_file = StringIO(csv_text)
+    measurement_table = pd.read_csv(csv_file)
+
+    return measurement_table
+
+
 if __name__ == "__main__":
     zip_path = "data/raw/Anomaly_Hunter.zip"
 
@@ -43,3 +53,11 @@ if __name__ == "__main__":
 
     print("\nHlavička prvého Raw Data.csv:")
     print(csv_header)
+
+    measurement_table = parse_raw_csv(csv_text)
+
+    print("\nRozmery tabuľky:")
+    print(measurement_table.shape)
+
+    print("\nPrvých päť riadkov:")
+    print(measurement_table.head())
