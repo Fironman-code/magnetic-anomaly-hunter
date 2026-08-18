@@ -4,6 +4,7 @@ import pytest
 
 from magnetic_anomaly_hunter.loader import (
     list_measurement_archives,
+    load_all_measurements,
     parse_raw_csv,
     read_raw_csv,
 )
@@ -24,6 +25,22 @@ EXPECTED_COLUMNS = [
     "Magnetic Field z (µT)",
     "Absolute field (µT)",
 ]
+
+EXPECTED_SERIES = {
+    "background_start",
+    "background_end",
+    "dmin",
+    "d05",
+    "d10",
+    "d20",
+}
+
+EXPECTED_GAPS = {
+    "dmin": 0.0,
+    "d05": 5.0,
+    "d10": 10.0,
+    "d20": 20.0,
+}
 
 
 def test_list_measurement_archives_finds_all_exports():
@@ -89,3 +106,29 @@ def test_parse_raw_csv_rejects_non_numeric_value():
 
     with pytest.raises(ValueError, match="Nečíselné údaje"):
         parse_raw_csv(invalid_csv)
+
+
+def test_load_all_measurements_adds_correct_metadata():
+    all_measurements = load_all_measurements(ARCHIVE_PATH)
+
+    assert not all_measurements.empty
+    assert all_measurements["source_archive"].nunique() == 14
+    assert set(all_measurements["series"].unique()) == EXPECTED_SERIES
+
+    for series, expected_gap in EXPECTED_GAPS.items():
+        series_rows = all_measurements[
+            all_measurements["series"] == series
+        ]
+
+        assert set(series_rows["repeat"].unique()) == {1, 2, 3}
+        assert series_rows["edge_gap_cm"].eq(expected_gap).all()
+
+    background_rows = all_measurements[
+        all_measurements["measurement_type"] == "background"
+    ]
+
+    assert set(background_rows["series"].unique()) == {
+        "background_start",
+        "background_end",
+    }
+    assert background_rows["edge_gap_cm"].isna().all()
