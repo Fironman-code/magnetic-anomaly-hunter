@@ -65,3 +65,27 @@ def test_parse_raw_csv_rejects_missing_column():
 
     with pytest.raises(ValueError, match="Absolute field"):
         parse_raw_csv(invalid_csv)
+
+
+def test_parse_raw_csv_rejects_missing_value():
+    invalid_csv = (
+        '"Time (s)","Magnetic Field x (µT)",'
+        '"Magnetic Field y (µT)","Magnetic Field z (µT)",'
+        '"Absolute field (µT)"\n'
+        "0.0,1.0,,3.0,4.0\n"
+    )
+
+    with pytest.raises(ValueError, match="Chýbajúce hodnoty"):
+        parse_raw_csv(invalid_csv)
+
+
+def test_parse_raw_csv_rejects_non_numeric_value():
+    invalid_csv = (
+        '"Time (s)","Magnetic Field x (µT)",'
+        '"Magnetic Field y (µT)","Magnetic Field z (µT)",'
+        '"Absolute field (µT)"\n'
+        '0.0,"chyba",2.0,3.0,4.0\n'
+    )
+
+    with pytest.raises(ValueError, match="Nečíselné údaje"):
+        parse_raw_csv(invalid_csv)

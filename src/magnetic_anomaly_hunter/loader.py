@@ -52,12 +52,41 @@ def validate_required_columns(measurement_table):
         )
 
 
+def validate_measurement_values(measurement_table):
+    """Overí, že povinné stĺpce obsahujú čísla a nemajú prázdne hodnoty."""
+    columns_with_missing_values = [
+        column
+        for column in REQUIRED_COLUMNS
+        if measurement_table[column].isna().any()
+    ]
+
+    if columns_with_missing_values:
+        raise ValueError(
+            "Chýbajúce hodnoty v stĺpcoch: "
+            f"{columns_with_missing_values}"
+        )
+
+    non_numeric_columns = [
+        column
+        for column in REQUIRED_COLUMNS
+        if not pd.api.types.is_numeric_dtype(
+            measurement_table[column]
+        )
+    ]
+
+    if non_numeric_columns:
+        raise ValueError(
+            f"Nečíselné údaje v stĺpcoch: {non_numeric_columns}"
+        )
+
+
 def parse_raw_csv(csv_text):
     """Premení CSV text na skontrolovanú dátovú tabuľku."""
     csv_file = StringIO(csv_text)
     measurement_table = pd.read_csv(csv_file)
 
     validate_required_columns(measurement_table)
+    validate_measurement_values(measurement_table)
 
     return measurement_table
 
