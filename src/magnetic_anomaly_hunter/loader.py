@@ -4,6 +4,15 @@ from zipfile import ZipFile
 import pandas as pd
 
 
+REQUIRED_COLUMNS = [
+    "Time (s)",
+    "Magnetic Field x (µT)",
+    "Magnetic Field y (µT)",
+    "Magnetic Field z (µT)",
+    "Absolute field (µT)",
+]
+
+
 def list_measurement_archives(zip_path):
     """Vráti zoradený zoznam ciest ku všetkým vnoreným ZIP exportom."""
     with ZipFile(zip_path) as outer_zip:
@@ -29,10 +38,26 @@ def read_raw_csv(zip_path, archive_name):
     return csv_data.decode("utf-8-sig")
 
 
+def validate_required_columns(measurement_table):
+    """Overí prítomnosť všetkých povinných stĺpcov."""
+    missing_columns = [
+        column
+        for column in REQUIRED_COLUMNS
+        if column not in measurement_table.columns
+    ]
+
+    if missing_columns:
+        raise ValueError(
+            f"Chýbajú povinné stĺpce: {missing_columns}"
+        )
+
+
 def parse_raw_csv(csv_text):
-    """Premení CSV text na dátovú tabuľku."""
+    """Premení CSV text na skontrolovanú dátovú tabuľku."""
     csv_file = StringIO(csv_text)
     measurement_table = pd.read_csv(csv_file)
+
+    validate_required_columns(measurement_table)
 
     return measurement_table
 

@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from magnetic_anomaly_hunter.loader import (
     list_measurement_archives,
     parse_raw_csv,
@@ -52,3 +54,14 @@ def test_parse_raw_csv_returns_numeric_table():
     assert list(measurement_table.columns) == EXPECTED_COLUMNS
     assert not measurement_table.empty
     assert all(dtype.kind in "fi" for dtype in measurement_table.dtypes)
+
+
+def test_parse_raw_csv_rejects_missing_column():
+    invalid_csv = (
+        '"Time (s)","Magnetic Field x (µT)",'
+        '"Magnetic Field y (µT)","Magnetic Field z (µT)"\n'
+        "0.0,1.0,2.0,3.0\n"
+    )
+
+    with pytest.raises(ValueError, match="Absolute field"):
+        parse_raw_csv(invalid_csv)
