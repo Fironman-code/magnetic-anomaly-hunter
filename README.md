@@ -4,6 +4,12 @@ An experimental Python project investigating how the magnetic field measured by 
 
 The project loads the original magnetometer exports, validates and processes the data, calculates the vector deviation from the background field, and automatically generates the final chart.
 
+## AI assistance disclosure
+
+This project was developed with substantial assistance from AI (OpenAI ChatGPT/Codex). AI assisted with the project architecture, Python implementation, automated tests, data analysis, visualization, and documentation.
+
+The repository owner designed and performed the physical experiment, collected the measurement data, supplied the experimental decisions, ran the code and tests, and reviewed the generated outputs and conclusions. This repository should therefore be understood as an AI-assisted learning project, not as work produced independently without AI.
+
 ![Magnetic anomaly as a function of distance](figures/anomaly_vs_distance.png)
 
 ## Research question
